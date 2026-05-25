@@ -14,6 +14,9 @@ Open source: There are tens of thousands of open-source AI models available. The
 
 Closed source: There is no exact, universally agreed-on number of closed-source AI models, but major tech companies have launched and maintained dozens of proprietary foundation models. Instead of a single count, the AI landscape features distinct tiers of closed-source models managed by major AI vendors.
 
+
+---
+
 ## Which models are good?
 
 ![alt text](image.png)
@@ -21,3 +24,7 @@ Closed source: There is no exact, universally agreed-on number of closed-source 
 ![alt text](image-1.png)
 
 ![alt text](image-2.png)
+
+![alt text](image-3.png)
+
+![alt text](image-4.png)
