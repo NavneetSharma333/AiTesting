@@ -98,4 +98,4 @@ Continuously monitor the success metrics during testing (Login Success Rate, Pag
 
 ---
 
-Made by [Navneet_Sharma] with The AI models (closed and open both).
+Made by [Navneet_Sharma] with the AI models (closed and open both models).
