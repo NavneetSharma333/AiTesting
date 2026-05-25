@@ -3,7 +3,7 @@
 
 Overall Test Plan Goal: To ensure the VWO Login Dashboard meets all functional and non-functional requirements as outlined in the PRD, delivering a secure, intuitive, and performant experience for all target users.
 
-- **Author:** Nanveet — QA Engineer
+- **Author:** Nanveet Sharma — QA Engineer
 
 ---
 
