@@ -1,0 +1,160 @@
+{
+  "name": "Jira Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -176,
+        -64
+      ],
+      "id": "462b88fb-13f2-4c3d-9232-02da4229abf1",
+      "name": "When chat message received",
+      "webhookId": "9896141d-f405-4ce6-ae7c-6ef5f33c35a1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a QA engineer with 6 years of experience, you will get details of jira via chat. your task is to create a jira ticket with proper steps to reproduce and proper instructions like jira."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        48,
+        -32
+      ],
+      "id": "c68f0d36-18a5-485f-ba7b-75b876adf494",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        128
+      ],
+      "id": "7dbdf3b0-b65a-4a98-b6e6-dd052d8cff03",
+      "name": "Qwen Brain",
+      "credentials": {
+        "groqApi": {
+          "id": "AH8shf30AYFGCwzA",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10000",
+          "mode": "list",
+          "cachedResultName": "QA Testing"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10007",
+          "mode": "list",
+          "cachedResultName": "Bug"
+        },
+        "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        336,
+        128
+      ],
+      "id": "a1ca8a2c-facb-426d-a2df-d45730d164b7",
+      "name": "Create a bug in jira under qa testing project",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "ZOctebvR611HKeLx",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        80,
+        128
+      ],
+      "id": "56d12963-0e38-47c9-9ec8-a4640f38a9cd",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qwen Brain": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a bug in jira under qa testing project": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "63b17727-36dd-423e-8bfd-0e43ab264322",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "83972fff012edcc6bd59ff1b113665495b0d6cafd813793b4a7121e8ee6603f9"
+  },
+  "nodeGroups": [],
+  "id": "2N6deWqZ8bVUB5gr",
+  "tags": []
+}
