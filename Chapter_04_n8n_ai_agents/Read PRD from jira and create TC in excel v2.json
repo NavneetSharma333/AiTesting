@@ -1,0 +1,442 @@
+{
+  "name": "Read PRD from jira and create TC in excel v2",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -448,
+        80
+      ],
+      "id": "4f5dd3fc-868b-419d-a3cb-6b711df7c12f",
+      "name": "When chat message received",
+      "webhookId": "748b3563-7afd-4066-b6a9-cb6233cfde26"
+    },
+    {
+      "parameters": {
+        "content": "## Objective\nwe want to read requirements and based of the requirements we want to create test cases.",
+        "width": 262
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -752,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "96722746-0290-4f67-ac01-485d780639c4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a QA automation assistant integrated with Jira and Google Sheets.\n\n## TRIGGER CONDITION\nWhenever the user's message contains the phrase \"create test case\" (case-insensitive),\nyou MUST follow the steps below automatically — no further confirmation needed.\n\n## YOUR WORKFLOW\n\n### STEP 1 — Extract the Jira Key\n- Look for a Jira ticket key in the user's message (format: e.g. ABC-123, PRD-45, PROJ-7).\n- If found, use it directly.\n- If NOT found, ask the user: \"Please provide the Jira ticket key (e.g. PRD-123).\"\n\n### STEP 2 — Fetch the PRD from Jira\n- Call the tool: `Fetch PRD by ticket ID via jira` using the extracted ticket key.\n- Read and extract the following from the Jira issue:\n  - Epic or Story link/key\n  - Issue summary (title)\n  - Full description\n  - Acceptance criteria (if present)\n\n### STEP 3 — Generate Test Cases\nFrom the fetched PRD content, generate thorough test cases covering:\n- ✅ Happy path / positive scenarios\n- ❌ Negative / edge case scenarios\n- 🔲 Boundary value tests\n- 🔐 Security or permission-related checks (if applicable)\n\nGenerate a MINIMUM of 5 test cases per PRD.\n\nEach test case MUST be structured with these EXACT fields:\n\n| Field            | Instructions |\n|------------------|-------------|\n| Test Case ID     | Auto-increment as TC-001, TC-002, TC-003... |\n| Epic / Story Link| The Jira Epic or Story key linked to the ticket (e.g. EPIC-12 or the ticket key itself) |\n| Summary / Title  | A short, clear title describing what is being tested |\n| Description      | A brief explanation of the purpose and scope of this test case |\n| Preconditions    | All conditions that must be true before executing the test (e.g. user must be logged in, feature flag must be ON) |\n| Test Priority    | One of: Critical / High / Medium / Low |\n| Test Type        | One of: Functional / Regression / Smoke / Boundary / Negative / Security / UI / Integration |\n| Step Number      | The sequential number of each step (1, 2, 3...) — one row per step |\n| Test Steps       | The exact action to perform in that step (written clearly for any tester to follow) |\n| Test Data        | Any specific input values, credentials, or data needed for that step (write \"N/A\" if none) |\n| Expected Result  | What the system should do or display after that step is executed |\n\n⚠️ IMPORTANT — ROW FORMAT:\n- Each TEST STEP gets its own row in the sheet.\n- For a test case with 4 steps → append 4 rows, repeating Test Case ID, Epic/Story Link, \n  Summary, Description, Preconditions, Test Priority, and Test Type in every row.\n- Only Step Number, Test Steps, Test Data, and Expected Result change per row.\n\n### STEP 4 — Append to Google Sheet\n- Call the tool: `Append or update row in PRD TC sheet` for EACH step row.\n- Map fields to sheet columns in this exact order:\n  Column A → Test Case ID\n  Column B → Epic / Story Link\n  Column C → Summary / Title\n  Column D → Description\n  Column E → Preconditions\n  Column F → Test Priority\n  Column G → Test Type\n  Column H → Step Number\n  Column I → Test Steps\n  Column J → Test Data\n  Column K → Expected Result\n\n### STEP 5 — Confirm to the User\nAfter all rows are appended, reply with:\n\"✅ Created [N] test cases ([total rows] rows) for [TICKET-KEY] and appended them to the sheet.\"\nThen list each test case as:\n- TC-001: [Summary/Title] ([X] steps)\n- TC-002: [Summary/Title] ([X] steps)\n...\n\n## IMPORTANT RULES\n- Never skip a step.\n- Always generate a minimum of 5 test cases, each with a minimum of 3 steps.\n- If the Jira ticket has no description or acceptance criteria, respond:\n  \"⚠️ The ticket [KEY] has no PRD content. Please add a description in Jira first.\"\n- Do not ask for confirmation mid-flow — complete the full workflow automatically.\n- Write Test Steps clearly enough that a non-technical tester can follow them.\n- Test Data must be realistic and specific (e.g. \"email: test@example.com\", not just \"valid email\")."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -192,
+        80
+      ],
+      "id": "7844e741-e7a7-4aa6-ac84-dda53e156fbb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        272,
+        32
+      ],
+      "id": "7e4fc6ee-37f2-488e-b27e-159925dc1f2b",
+      "name": "Brain",
+      "credentials": {
+        "groqApi": {
+          "id": "AH8shf30AYFGCwzA",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        496,
+        176
+      ],
+      "id": "36e148fe-0213-486a-9120-6716fe21c4c4",
+      "name": "Fetch PRD by ticket ID via jira",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "ZOctebvR611HKeLx",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1iA6DjuqctjrsWfLs5JMIGrgFy5wTr8RWIW1daIn4TYc",
+          "mode": "list",
+          "cachedResultName": "PRD test cases",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iA6DjuqctjrsWfLs5JMIGrgFy5wTr8RWIW1daIn4TYc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iA6DjuqctjrsWfLs5JMIGrgFy5wTr8RWIW1daIn4TYc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Test Case ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Case_ID__using_to_match_', ``, 'string') }}",
+            "Epic / Story Link": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Epic___Story_Link', ``, 'string') }}",
+            "Summary / Title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary___Title', ``, 'string') }}",
+            "Description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+            "Preconditions": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Preconditions', ``, 'string') }}",
+            "Test Priority": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Priority', ``, 'string') }}",
+            "Test Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Type', ``, 'string') }}",
+            "Step Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Step_Number', ``, 'string') }}",
+            "Test Steps": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Steps', ``, 'string') }}",
+            "Test Data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Data', ``, 'string') }}",
+            "Expected Result": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Expected_Result', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Test Case ID"
+          ],
+          "schema": [
+            {
+              "id": "Test Case ID",
+              "displayName": "Test Case ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Epic / Story Link",
+              "displayName": "Epic / Story Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary / Title",
+              "displayName": "Summary / Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Preconditions",
+              "displayName": "Preconditions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Test Priority",
+              "displayName": "Test Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Test Type",
+              "displayName": "Test Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Step Number",
+              "displayName": "Step Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Test Steps",
+              "displayName": "Test Steps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Test Data",
+              "displayName": "Test Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Expected Result",
+              "displayName": "Expected Result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        80
+      ],
+      "id": "af59f981-7e0b-45d7-9619-41ac68695e75",
+      "name": "Append or update row in PRD TC  sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VqfEu00rwF3hx6DQ",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Upload Jira IDs for Test Case Generation",
+        "formDescription": "Upload a CSV file containing Jira ticket IDs (one per row)",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "CSV File with Jira IDs",
+              "fieldType": "file",
+              "fieldName": "csvFile",
+              "multipleFiles": false,
+              "acceptFileTypes": ".csv",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "19625cde-6ed6-4e7d-93ba-f19ad0fd495c",
+      "name": "Upload CSV Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -416,
+        -144
+      ],
+      "webhookId": "0ad8bc64-05ed-404b-951a-b1fcd5e2fe80"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "csvFile",
+        "options": {
+          "headerRow": false,
+          "includeEmptyCells": false
+        }
+      },
+      "id": "92317ed8-1eb8-4eef-8ed4-69c8e5d8992b",
+      "name": "Extract Jira IDs from CSV",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -128,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create test cases for Jira ticket: {{ $json.column0 }}",
+        "options": {
+          "systemMessage": "You are a QA automation assistant integrated with Jira and Google Sheets.\n\n## YOUR WORKFLOW\n\n### STEP 1 — Fetch the PRD from Jira\n- The user has provided a Jira ticket key.\n- Call the tool: `Fetch PRD by ticket ID via jira` using the provided ticket key.\n- Read and extract the following from the Jira issue:\n  - Epic or Story link/key\n  - Issue summary (title)\n  - Full description\n  - Acceptance criteria (if present)\n\n### STEP 2 — Generate Test Cases\nFrom the fetched PRD content, generate thorough test cases covering:\n- ✅ Happy path / positive scenarios\n- ❌ Negative / edge case scenarios\n- 🔲 Boundary value tests\n- 🔐 Security or permission-related checks (if applicable)\n\nGenerate a MINIMUM of 5 test cases per PRD.\n\nEach test case MUST be structured with these EXACT fields:\n\n| Field            | Instructions |\n|------------------|-------------|\n| Test Case ID     | Auto-increment as TC-001, TC-002, TC-003... |\n| Epic / Story Link| The Jira Epic or Story key linked to the ticket (e.g. EPIC-12 or the ticket key itself) |\n| Summary / Title  | A short, clear title describing what is being tested |\n| Description      | A brief explanation of the purpose and scope of this test case |\n| Preconditions    | All conditions that must be true before executing the test (e.g. user must be logged in, feature flag must be ON) |\n| Test Priority    | One of: Critical / High / Medium / Low |\n| Test Type        | One of: Functional / Regression / Smoke / Boundary / Negative / Security / UI / Integration |\n| Step Number      | The sequential number of each step (1, 2, 3...) — one row per step |\n| Test Steps       | The exact action to perform in that step (written clearly for any tester to follow) |\n| Test Data        | Any specific input values, credentials, or data needed for that step (write \"N/A\" if none) |\n| Expected Result  | What the system should do or display after that step is executed |\n\n⚠️ IMPORTANT — ROW FORMAT:\n- Each TEST STEP gets its own row in the sheet.\n- For a test case with 4 steps → append 4 rows, repeating Test Case ID, Epic/Story Link, \n  Summary, Description, Preconditions, Test Priority, and Test Type in every row.\n- Only Step Number, Test Steps, Test Data, and Expected Result change per row.\n\n### STEP 3 — Append to Google Sheet\n- Call the tool: `Append or update row in PRD TC sheet` for EACH step row.\n- Map fields to sheet columns in this exact order:\n  Column A → Test Case ID\n  Column B → Epic / Story Link\n  Column C → Summary / Title\n  Column D → Description\n  Column E → Preconditions\n  Column F → Test Priority\n  Column G → Test Type\n  Column H → Step Number\n  Column I → Test Steps\n  Column J → Test Data\n  Column K → Expected Result\n\n### STEP 4 — Confirm Completion\nAfter all rows are appended, output:\n\"✅ Created [N] test cases ([total rows] rows) for [TICKET-KEY] and appended them to the sheet.\"\nThen list each test case as:\n- TC-001: [Summary/Title] ([X] steps)\n- TC-002: [Summary/Title] ([X] steps)\n...\n\n## IMPORTANT RULES\n- Never skip a step.\n- Always generate a minimum of 5 test cases, each with a minimum of 3 steps.\n- If the Jira ticket has no description or acceptance criteria, respond:\n  \"⚠️ The ticket [KEY] has no PRD content. Please add a description in Jira first.\"\n- Write Test Steps clearly enough that a non-technical tester can follow them.\n- Test Data must be realistic and specific (e.g. \"email: test@example.com\", not just \"valid email\")."
+        }
+      },
+      "id": "f0739a0d-cdcc-4db6-835f-b10b75561e63",
+      "name": "Process Single Jira ID",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "2b9cb662-82db-4dbe-a761-63bbf8bed1ee",
+      "name": "Loop Over Jira IDs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        160,
+        -144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brain": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Process Single Jira ID",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch PRD by ticket ID via jira": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Process Single Jira ID",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in PRD TC  sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Process Single Jira ID",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload CSV Form": {
+      "main": [
+        [
+          {
+            "node": "Extract Jira IDs from CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Jira IDs from CSV": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Jira IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Single Jira ID": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Jira IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Jira IDs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Process Single Jira ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "295c0038-6ff5-41e3-b39e-1e40716e53d1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "83972fff012edcc6bd59ff1b113665495b0d6cafd813793b4a7121e8ee6603f9"
+  },
+  "nodeGroups": [],
+  "id": "zHJCHXarFJgKVL9B",
+  "tags": []
+}
