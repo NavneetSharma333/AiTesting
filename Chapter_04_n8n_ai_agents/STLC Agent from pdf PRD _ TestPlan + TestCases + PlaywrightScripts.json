@@ -4,10 +4,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are a QA expert. Based on the PRD document provided, create a comprehensive test plan.\n\nPRD Content:\n{{ $json.text }}\n\nGenerate a detailed test plan covering:\n- Overview and scope\n- Test objectives\n- Test strategy and approach\n- Test environment requirements\n- Schedule and milestones\n\nFor the VWO login flow at https://app.vwo.com/, ensure the test plan covers:\n- Valid login scenarios (successful authentication → dashboard)\n- Invalid login scenarios (authentication failure → error page)\n- Edge cases and security considerations",
+        "text": "=You are a QA expert. Based on the PRD document provided, create a comprehensive test plan.\nPRD Content:\n{{ $json.text }}\nGenerate a detailed test plan covering:\n- Overview and scope\n- Test objectives\n- Test strategy and approach\n- Test environment requirements\n- Schedule and milestones\nFor the VWO login flow at https://app.vwo.com/, ensure the test plan covers:\n- Valid login scenarios (successful authentication → dashboard)\n- Invalid login scenarios (authentication failure → error page)\n- Edge cases and security considerations\n\nReturn ONLY this exact JSON format, nothing else, no markdown, no backticks:\n{\n  \"overview\": \"Brief overview of the test plan\",\n  \"scope\": \"What is in and out of scope\",\n  \"objectives\": \"Key testing objectives listed here\",\n  \"testStrategy\": \"Testing approach and methodology\",\n  \"environment\": \"Required test environment details\",\n  \"schedule\": \"Timeline and milestones\"\n}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "You are an expert QA engineer specializing in test planning. Create comprehensive, well-structured test plans based on PRD documents."
+          "systemMessage": "You are an expert QA engineer specializing in test planning. Create comprehensive, well-structured test plans based on PRD documents.\n\nReturn ONLY a valid JSON object like this, no explanation, no markdown:\n{\"overview\":\"...\",\"scope\":\"...\",\"objectives\":\"...\",\"testStrategy\":\"...\",\"environment\":\"...\",\"schedule\":\"...\"}"
         }
       },
       "id": "e5ec0dc4-00d7-47c3-84ea-2f51b8bfcbaa",
@@ -16,7 +16,7 @@
       "typeVersion": 3.1,
       "position": [
         -800,
-        416
+        384
       ],
       "retryOnFail": true,
       "maxTries": 2,
@@ -24,24 +24,11 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\"testPlan\":{\"overview\":\"Test plan overview\",\"scope\":\"What will be tested\",\"objectives\":[\"Objective 1\",\"Objective 2\"],\"testStrategy\":\"Testing approach\",\"environment\":\"Test environment details\",\"schedule\":\"Timeline\"}}"
-      },
-      "id": "67679506-584e-4c7f-84d1-0db81f70cf8c",
-      "name": "Test Plan Parser",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [
-        -656,
-        640
-      ]
-    },
-    {
-      "parameters": {
         "promptType": "define",
-        "text": "=You are a QA expert. Based on the test plan, create detailed test cases.\n\nTest Plan:\n{{ $(\"Generate Test Plan\").item.json.output.testPlan }}\n\nGenerate comprehensive test cases with:\n- Unique test case ID\n- Clear title and description\n- Preconditions\n- Step-by-step test steps\n- Expected results\n- Priority (High/Medium/Low)\n- Category (Functional/UI/Security/etc.)\n\nFor VWO login at https://app.vwo.com/, include test cases for:\n1. Valid credentials → Dashboard page\n2. Invalid credentials → Error page\n3. Empty fields validation\n4. Password visibility toggle\n5. Remember me functionality",
+        "text": "=You are a QA expert. Generate detailed test cases for VWO login at https://app.vwo.com/\n\nGenerate test cases for these scenarios:\n1. Valid credentials → Dashboard page\n2. Invalid credentials → Error page\n3. Empty fields validation\n4. Password visibility toggle\n5. Remember me functionality\n\nReturn ONLY this exact JSON format, nothing else, no markdown, no backticks:\n{\n  \"testCases\": [\n    {\n      \"id\": \"TC001\",\n      \"title\": \"Login with valid credentials\",\n      \"description\": \"Verify user can login successfully\",\n      \"preconditions\": \"User has valid account\",\n      \"steps\": \"1. Go to https://app.vwo.com/. 2. Enter valid email. 3. Enter valid password. 4. Click Login\",\n      \"expectedResult\": \"User is redirected to dashboard\",\n      \"priority\": \"High\",\n      \"category\": \"Functional\"\n    }\n  ]\n}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "You are an expert QA engineer. Create detailed, executable test cases that cover all scenarios comprehensively."
+          "systemMessage": "You are a test case writer. Return ONLY valid JSON, no markdown, no backticks, no explanation.\nFormat:\n{\n  \"testCases\": [\n    {\n      \"id\": \"TC001\",\n      \"title\": \"Login with valid credentials\",\n      \"description\": \"Verify user can login successfully\",\n      \"preconditions\": \"User has valid account\",\n      \"steps\": \"1. Go to URL. 2. Enter email. 3. Enter password. 4. Click Login\",\n      \"expectedResult\": \"User is redirected to dashboard\",\n      \"priority\": \"High\",\n      \"category\": \"Functional\"\n    }\n  ]\n}"
         }
       },
       "id": "31b73e4a-79c1-4ea1-b1f7-f0c80ae8451a",
@@ -49,8 +36,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -448,
-        288
+        -464,
+        304
       ],
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -58,24 +45,11 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\"testCases\":[{\"id\":\"TC001\",\"title\":\"Test case title\",\"description\":\"Test case description\",\"preconditions\":\"Prerequisites\",\"steps\":[\"Step 1\",\"Step 2\"],\"expectedResult\":\"Expected outcome\",\"priority\":\"High\",\"category\":\"Functional\"}]}"
-      },
-      "id": "fa6fb239-8769-4b15-b19d-42b65c0304b1",
-      "name": "Test Cases Parser",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [
-        -304,
-        512
-      ]
-    },
-    {
-      "parameters": {
         "promptType": "define",
-        "text": "=You are a test automation expert. Based on the test cases provided, generate Playwright test scripts in the exact JSON format specified.\n\nTest Cases:\n{{ JSON.stringify($(\"Generate Test Cases\").item.json.output.testCases) }}\n\nFor each test case, create a Playwright script following these requirements:\n\n1. Use proper Playwright syntax with describe/test blocks\n2. Include page.goto() for navigation to https://app.vwo.com/\n3. Use page.locator() or page.getByRole() for element selection\n4. Add await page.waitForLoadState() after navigation\n5. Include expect() assertions for verification\n6. Add comments for clarity\n7. Handle both success (dashboard) and failure (error) scenarios\n\nExample structure (do not include backticks in output):\nconst test expect = require(\"@playwright/test\");\n\ntest.describe(\"Test Suite\", () => {\n  test(\"test name\", async ({ page }) => {\n    await page.goto(\"https://app.vwo.com/\");\n  });\n});\n\nGenerate complete, executable Playwright code for each test case.",
+        "text": "=You are a test automation expert. Generate Playwright test scripts for VWO login at https://app.vwo.com/\n\nGenerate scripts for these scenarios:\n1. Valid credentials → successful login → dashboard\n2. Invalid credentials → error message shown\n3. Empty fields validation\n4. Password visibility toggle\n5. Remember me functionality\n\nRequirements:\n1. Use proper Playwright syntax with describe/test blocks\n2. Include page.goto() for navigation to https://app.vwo.com/\n3. Use page.locator() or page.getByRole() for element selection\n4. Add await page.waitForLoadState() after navigation\n5. Include expect() assertions for verification\n6. Add comments for clarity\n\nReturn ONLY this exact JSON format, nothing else, no markdown, no backticks:\n{\n  \"playwrightScripts\": [\n    {\n      \"testId\": \"TC001\",\n      \"fileName\": \"test_vwo_login.spec.js\",\n      \"content\": \"const { test, expect } = require('@playwright/test'); test.describe('VWO Login', () => { test('valid login', async ({ page }) => { await page.goto('https://app.vwo.com/'); }); });\"\n    }\n  ]\n}\n\nGenerate ONE separate object per test case in the playwrightScripts array.\nEach script content MUST use \\n for line breaks, not actual newlines.\nDo NOT combine all tests into one file.",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "You are an expert test automation engineer. Generate valid Playwright test scripts. Always return data in the exact JSON structure requested by the output parser. Be precise and follow the schema exactly.\n\nReturn ONLY valid JSON.\n\nIMPORTANT:\nEach playwrightScripts item MUST contain:\n\n- testId (required)\n- fileName (required)\n- content (required)\n\nDO NOT generate:\n- scriptId\n- id\n- testcaseId\n- extra fields\n\nSchema:\n\n{\n  \"playwrightScripts\": [\n    {\n      \"testId\": \"string\",\n      \"fileName\": \"string\",\n      \"content\": \"string\"\n    }\n  ]\n}\n\nMap incoming test case IDs directly into testId."
+          "systemMessage": "You are an expert test automation engineer. Generate valid Playwright test scripts. Always return data in the exact JSON structure requested by the output parser. Be precise and follow the schema exactly.\n\nReturn ONLY valid JSON.\n\nIMPORTANT:\nEach playwrightScripts item MUST contain:\n\n- testId (required)\n- fileName (required)\n- content (required)\n\nDO NOT generate:\n- scriptId\n- id\n- testcaseId\n- extra fields\n\nSchema:\n\n{\n  \"playwrightScripts\": [\n    {\n      \"testId\": \"string\",\n      \"fileName\": \"string\",\n      \"content\": \"string\"\n    }\n  ]\n}\n\nMap incoming test case IDs directly into testId.\n\nReturn ONLY a valid JSON object like this, no explanation, no markdown:\n{\"overview\":\"...\",\"scope\":\"...\",\"objectives\":\"...\",\"testStrategy\":\"...\",\"environment\":\"...\",\"schedule\":\"...\"}"
         }
       },
       "id": "fa52b8de-b79c-48c4-a129-176e8f60e7b3",
@@ -83,8 +57,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -96,
-        160
+        -160,
+        -32
       ],
       "retryOnFail": true,
       "maxTries": 2,
@@ -93,28 +67,29 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"playwrightScripts\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"testId\": {\"type\":\"string\"},\n          \"fileName\":{\"type\":\"string\"},\n          \"content\":{\"type\":\"string\"}\n        },\n        \"required\":[\n          \"testId\",\n          \"fileName\",\n          \"content\"\n        ],\n        \"additionalProperties\": false\n      }\n    }\n  }\n}"
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"testId\":   { \"type\": \"string\" },\n    \"fileName\": { \"type\": \"string\" },\n    \"content\":  { \"type\": \"string\" }\n  },\n  \"required\": [\"testId\", \"fileName\", \"content\"]\n}"
       },
       "id": "3cc96333-ef50-4e90-a6a8-ebf3a7eb9af6",
       "name": "Playwright Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        48,
-        384
-      ]
+        64,
+        224
+      ],
+      "disabled": true
     },
     {
       "parameters": {
-        "jsCode": "const scripts = $input.first().json.output.playwrightScripts;\\n\\nlet markdown = \"# Playwright Test Scripts\\\\n\\\\n\";\\n\\nscripts.forEach(script => {\\n  markdown += `## ${script.testId} - ${script.fileName}\\n\\n`;\\n  markdown += \"```javascript\\n\";\n  markdown += script.content;\n  markdown += \"\\n```\\\\n\\\\n\";\\n});\\n\\nreturn [{ json: { playwrightMd: markdown } }];"
+        "jsCode": "const data = $input.first().json;\nconst scripts = Array.isArray(data?.output) ? data.output : (data?.output?.playwrightScripts || data?.playwrightScripts || [data?.output || data]);\nlet markdown = \"# Playwright Test Scripts\\n\\n\";\nscripts.forEach(script => {\n  markdown += \"## \" + script.testId + \" - \" + script.fileName + \"\\n\\n\";\n  markdown += \"```javascript\\n\";\n  markdown += script.content;\n  markdown += \"\\n```\\n\\n\";\n});\nreturn [{ json: { playwrightMd: markdown } }];"
       },
       "id": "46b0e865-a0b6-426e-9d8a-5e1c34b4602b",
       "name": "Format Playwright MD",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        160
+        304,
+        208
       ]
     },
     {
@@ -132,40 +107,40 @@
     },
     {
       "parameters": {
-        "jsCode": "const testCases = $input.first().json.output.testCases;\n\nconst headers = \"ID,Title,Description,Preconditions,Steps,Expected Result,Priority,Category\";\nconst rows = testCases.map(tc => {\n  const steps = tc.steps.join(\"; \");\n  const id = tc.id || \"\";\n  const title = tc.title || \"\";\n  const desc = tc.description || \"\";\n  const pre = tc.preconditions || \"\";\n  const exp = tc.expectedResult || \"\";\n  const pri = tc.priority || \"\";\n  const cat = tc.category || \"\";\n  return `\"${id}\",\"${title}\",\"${desc}\",\"${pre}\",\"${steps}\",\"${exp}\",\"${pri}\",\"${cat}\"`;\n});\n\nconst csv = [headers, ...rows].join(\"\\n\");\n\nreturn [{ json: { testCasesCsv: csv } }];"
+        "jsCode": "const data = $input.first().json;\nconst testCases = Array.isArray(data?.output) ? data.output : (data?.output?.testCases || data?.testCases || [data?.output || data]);\nconst headers = \"ID,Title,Description,Preconditions,Steps,Expected Result,Priority,Category\";\nconst rows = testCases.map(tc => {\n  const steps = tc.steps || \"\";\n  const id = (tc.id || \"\").replace(/\"/g, '\"\"');\n  const title = (tc.title || \"\").replace(/\"/g, '\"\"');\n  const desc = (tc.description || \"\").replace(/\"/g, '\"\"');\n  const pre = (tc.preconditions || \"\").replace(/\"/g, '\"\"');\n  const exp = (tc.expectedResult || \"\").replace(/\"/g, '\"\"');\n  const pri = (tc.priority || \"\").replace(/\"/g, '\"\"');\n  const cat = (tc.category || \"\").replace(/\"/g, '\"\"');\n  return '\"' + id + '\",\"' + title + '\",\"' + desc + '\",\"' + pre + '\",\"' + steps + '\",\"' + exp + '\",\"' + pri + '\",\"' + cat + '\"';\n});\nconst csv = [headers, ...rows].join(\"\\n\");\nreturn [{ json: { testCasesCsv: csv } }];"
       },
       "id": "c556f650-4fac-4fa3-8dfa-9a6885cb7ae1",
       "name": "Format Test Cases CSV",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        416
+        272,
+        384
       ]
     },
     {
       "parameters": {
-        "jsCode": "const testPlan = $input.first().json.output.testPlan;\n\nlet markdown = \"# Test Plan\\n\\n\";\nmarkdown += \"## Overview\\n\" + testPlan.overview + \"\\n\\n\";\nmarkdown += \"## Scope\\n\" + testPlan.scope + \"\\n\\n\";\nmarkdown += \"## Objectives\\n\";\ntestPlan.objectives.forEach(obj => {\n  markdown += \"- \" + obj + \"\\n\";\n});\nmarkdown += \"\\n## Test Strategy\\n\" + testPlan.testStrategy + \"\\n\\n\";\nmarkdown += \"## Test Environment\\n\" + testPlan.environment + \"\\n\\n\";\nmarkdown += \"## Schedule\\n\" + testPlan.schedule + \"\\n\";\n\nreturn [{ json: { testPlanMd: markdown } }];"
+        "jsCode": "const data = $input.first().json;\nconst testPlan = data?.output || data;\n\nlet markdown = \"# Test Plan\\n\\n\";\nmarkdown += \"## Overview\\n\" + (typeof testPlan.overview === \"object\" ? JSON.stringify(testPlan.overview) : testPlan.overview || \"\") + \"\\n\\n\";\nmarkdown += \"## Scope\\n\" + (typeof testPlan.scope === \"object\" ? JSON.stringify(testPlan.scope) : testPlan.scope || \"\") + \"\\n\\n\";\nmarkdown += \"## Objectives\\n\" + (testPlan.objectives || \"\") + \"\\n\\n\";\nmarkdown += \"## Test Strategy\\n\" + (typeof testPlan.testStrategy === \"object\" ? JSON.stringify(testPlan.testStrategy) : testPlan.testStrategy || \"\") + \"\\n\\n\";\nmarkdown += \"## Test Environment\\n\" + (typeof testPlan.environment === \"object\" ? Object.entries(testPlan.environment).map(([k,v]) => k + \": \" + v).join(\"\\n\") : testPlan.environment || \"\") + \"\\n\\n\";\nmarkdown += \"## Schedule\\n\" + (typeof testPlan.schedule === \"object\" ? Object.entries(testPlan.schedule).map(([k,v]) => k + \": \" + v).join(\"\\n\") : testPlan.schedule || \"\") + \"\\n\";\n\nreturn [{ json: { testPlanMd: markdown } }];"
       },
       "id": "7bab9cca-e722-4a39-97d9-ac9043de5a6c",
       "name": "Format Test Plan MD",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        624
+        240,
+        560
       ]
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\\n\\nconst playwrightMd = items.find(i => i.json.playwrightMd)?.json.playwrightMd || \"\";\\nconst testCasesCsv = items.find(i => i.json.testCasesCsv)?.json.testCasesCsv || \"\";\\nconst testPlanMd = items.find(i => i.json.testPlanMd)?.json.testPlanMd || \"\";\\n\\nlet output = \"# Test Artifacts Generated\\\\n\\\\n\";\\noutput += \"## 1. Test Plan (test_plan.md)\\\\n\\\\n\";\\noutput += testPlanMd;\\noutput += \"\\\\n\\\\n---\\\\n\\\\n\";\\noutput += \"## 2. Test Cases (test_cases.csv)\\\\n\\\\n\";\\noutput += \"```csv\\n\";\noutput += testCasesCsv;\noutput += \"\\n```\\\\n\\\\n---\\\\n\\\\n\";\\noutput += \"## 3. Playwright Scripts (playwright_test_cases.md)\\\\n\\\\n\";\\noutput += playwrightMd;\\noutput += \"\\\\n\\\\n---\\\\n\\\\n\";\\noutput += \"✅ All test artifacts have been generated successfully!\";\\n\\nreturn [{ json: { output, testPlanMd, testCasesCsv, playwrightMd } }];"
+        "jsCode": "const items = $input.all();\n\nconst playwrightMd = items.find(i => i.json.playwrightMd)?.json.playwrightMd || \"\";\nconst testCasesCsv = items.find(i => i.json.testCasesCsv)?.json.testCasesCsv || \"\";\nconst testPlanMd = items.find(i => i.json.testPlanMd)?.json.testPlanMd || \"\";\n\nlet output = \"# Test Artifacts Generated\\n\\n\";\noutput += \"## 1. Test Plan (test_plan.md)\\n\\n\";\noutput += testPlanMd;\noutput += \"\\n\\n---\\n\\n\";\noutput += \"## 2. Test Cases (test_cases.csv)\\n\\n\";\noutput += \"```csv\\n\";\noutput += testCasesCsv;\noutput += \"\\n```\\n\\n---\\n\\n\";\noutput += \"## 3. Playwright Scripts (playwright_test_cases.md)\\n\\n\";\noutput += playwrightMd;\noutput += \"\\n\\n---\\n\\n\";\noutput += \"✅ All test artifacts have been generated successfully!\";\n\nreturn [{ json: { output, testPlanMd, testCasesCsv, playwrightMd } }];"
       },
       "id": "cb619d6b-5f72-4fc0-ae2a-853c7d95865b",
       "name": "Combine Outputs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        704,
+        656,
         416
       ]
     },
@@ -264,15 +239,16 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        928,
-        224
+        1184,
+        176
       ],
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "gr5mFImljas7Dph9",
           "name": "Google Drive OAuth2 API"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -297,15 +273,16 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        928,
-        416
+        1184,
+        384
       ],
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "iCE1Eu0nEIY99ynf",
           "name": "Google Drive OAuth2 API"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -330,7 +307,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        928,
+        1184,
         608
       ],
       "credentials": {
@@ -338,18 +315,19 @@
           "id": "iCE1Eu0nEIY99ynf",
           "name": "Google Drive OAuth2 API"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
-        "model": "whisper-large-v3",
+        "model": "llama-3.1-8b-instant",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        -176,
-        928
+        -880,
+        624
       ],
       "id": "d37e47a3-666c-4d68-8cf5-5fab102d710a",
       "name": "Groq Chat Model2",
@@ -362,48 +340,105 @@
     },
     {
       "parameters": {
+        "model": "llama-3.3-70b-versatile",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1.1,
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
       "position": [
-        -864,
-        640
+        -160,
+        192
       ],
-      "id": "22ae62d1-2d07-4587-8c2a-d165513507d8",
-      "name": "Google Gemini Chat Model",
+      "id": "698c1858-001f-44a3-8158-fe33529ffc55",
+      "name": "Groq Chat Model",
       "credentials": {
-        "googlePalmApi": {
-          "id": "OLAHeFWPZkAUkQCF",
-          "name": "Google Gemini(PaLM) Api account"
+        "groqApi": {
+          "id": "AH8shf30AYFGCwzA",
+          "name": "Groq account"
         }
       }
     },
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "gpt-4o-mini",
-          "mode": "list",
-          "cachedResultName": "gpt-4o-mini"
-        },
-        "builtInTools": {},
+        "operation": "toText",
+        "sourceProperty": "testPlanMd",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
       "position": [
-        -128,
+        912,
+        608
+      ],
+      "id": "4361e1fa-8412-4906-8376-8bc80a847ae8",
+      "name": "test_plan.md"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        912,
         416
       ],
-      "id": "a1b24b29-a07a-4550-96d0-b5f0de13eb36",
-      "name": "OpenAI Chat Model",
-      "credentials": {
-        "openAiApi": {
-          "id": "yRKsKcbWxMk8R3TP",
-          "name": "OpenAI account"
-        }
-      }
+      "id": "53cea893-8441-4ce2-8fa4-35066beccd27",
+      "name": "test_cases.csv"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "playwrightMd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        224
+      ],
+      "id": "a78c5d72-84cf-46f2-a220-033b81b2c820",
+      "name": "playwright_scripts.md"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.first().json.output || $input.first().json.text || \"\";\nraw = raw.replace(/<think>[\\s\\S]*?<\\/think>/g, \"\").trim();\nraw = raw.replace(/```json|```/g, \"\").trim();\n\n// Replace literal \\n \\r \\t text with actual characters\nraw = raw.replace(/\\\\n/g, \" \").replace(/\\\\r/g, \" \").replace(/\\\\t/g, \" \");\n\n// Extract JSON object\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nif (!match) throw new Error(\"No JSON found: \" + raw.substring(0, 200));\nraw = match[0];\n\nconst parsed = JSON.parse(raw);\nreturn [{ json: { output: parsed } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        592
+      ],
+      "id": "53dae50d-108c-4713-adc8-b2d23b5e8bdf",
+      "name": "TP extract json"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output || $input.first().json.text || \"\";\nconst cleaned = raw.replace(/```json|```/g, \"\").trim();\nconst parsed = JSON.parse(cleaned);\nconst playwrightScripts = Array.isArray(parsed) ? parsed : (parsed.playwrightScripts || [parsed]);\nreturn [{ json: { output: { playwrightScripts } } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        48
+      ],
+      "id": "f1ab0b7f-a92d-4251-a712-fb502b99d95b",
+      "name": "PW extract json"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.first().json.output || $input.first().json.text || \"\";\nraw = raw.replace(/<think>[\\s\\S]*?<\\/think>/g, \"\").trim();\nconst cleaned = raw.replace(/```json|```/g, \"\").trim();\nconst parsed = JSON.parse(cleaned);\nconst testCases = Array.isArray(parsed) ? parsed : (parsed.testCases || [parsed]);\nreturn [{ json: { output: { testCases } } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        384
+      ],
+      "id": "b87cdafc-7f97-4909-9ce4-ffd9f8561381",
+      "name": "TC extract json1"
     }
   ],
   "pinData": {},
@@ -417,19 +452,8 @@
             "index": 0
           },
           {
-            "node": "Format Test Plan MD",
+            "node": "TP extract json",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Test Plan Parser": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "Generate Test Plan",
-            "type": "ai_outputParser",
             "index": 0
           }
         ]
@@ -444,19 +468,8 @@
             "index": 0
           },
           {
-            "node": "Format Test Cases CSV",
+            "node": "TC extract json1",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Test Cases Parser": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "Generate Test Cases",
-            "type": "ai_outputParser",
             "index": 0
           }
         ]
@@ -466,7 +479,7 @@
       "main": [
         [
           {
-            "node": "Format Playwright MD",
+            "node": "PW extract json",
             "type": "main",
             "index": 0
           }
@@ -475,13 +488,7 @@
     },
     "Playwright Parser": {
       "ai_outputParser": [
-        [
-          {
-            "node": "Generate Playwright Scripts",
-            "type": "ai_outputParser",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Format Playwright MD": {
@@ -565,17 +572,17 @@
       "main": [
         [
           {
-            "node": "Save Test Plan to Drive",
+            "node": "test_plan.md",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Save Test Cases to Drive",
+            "node": "test_cases.csv",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Save Playwright Scripts to Drive",
+            "node": "playwright_scripts.md",
             "type": "main",
             "index": 0
           }
@@ -583,11 +590,6 @@
       ]
     },
     "Groq Chat Model2": {
-      "ai_languageModel": [
-        []
-      ]
-    },
-    "Google Gemini Chat Model": {
       "ai_languageModel": [
         [
           {
@@ -598,12 +600,45 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
+    "Groq Chat Model": {
       "ai_languageModel": [
         [
           {
             "node": "Generate Playwright Scripts",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TP extract json": {
+      "main": [
+        [
+          {
+            "node": "Format Test Plan MD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PW extract json": {
+      "main": [
+        [
+          {
+            "node": "Format Playwright MD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TC extract json1": {
+      "main": [
+        [
+          {
+            "node": "Format Test Cases CSV",
+            "type": "main",
             "index": 0
           }
         ]
@@ -616,7 +651,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "dbfc8e3f-cf63-431e-9942-f2db7cd44148",
+  "versionId": "9f8af55d-15c3-4b86-a8ff-44790d098d1d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "83972fff012edcc6bd59ff1b113665495b0d6cafd813793b4a7121e8ee6603f9"
