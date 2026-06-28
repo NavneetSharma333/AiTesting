@@ -14,7 +14,13 @@ Fetch a Jira issue by ID (e.g. SCRUM-8) and generate a   Test Plan from it.
 
 ### INPUT
 ```json
-
+{
+    "jira_url": "https://navsharmatest.atlassian.net/",
+    "jira_email": "navneetsharmatest@gmail.com",
+    "jira_token": "ATATT3xFfGF0Wm1mAmuLNXM_iH7SSjugHN0rvzD6TLojBAqH6hNxh3Ca-jyFmD9q9aa-8VyHWmyfowAu2Ce0TIUvc0WJ8p2SjtbLM23NkuDjrCHE9gqd4bvR1i6R4Riz_BRkgzdMac8LUJLoSk4T4us3rKthlSiFGV4fKRU8DGqETk4QsZRBNSQ=402B6F41",
+    "groq_key": "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",
+    "jira_id": "SCRUM-8"
+}
 ```
 
 ### OUTPUT (Test Strategy Format)
