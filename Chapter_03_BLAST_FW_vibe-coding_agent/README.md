@@ -1,4 +1,4 @@
-# BLAST Jira Test Plan Generator
+# BLAST Jira Test Plan Generator > Converted to Jira STLC Agent
 
 Enterprise-grade test plan generation from Jira issues using the **B.L.A.S.T. Framework** (Blueprint, Link, Architect, Stylize, Trigger).
 
