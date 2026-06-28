@@ -1,7 +1,7 @@
 # Progress: Jira Test Plan Generator
 
-**Last Updated:** 2026-06-25  
-**Status:** Phase 1 Complete → Awaiting Phase 2 Approval
+**Last Updated:** 2026-06-29  
+**Status:** Phase 4 Complete → Phase 5 (Deployed to Vercel)
 
 ---
 
@@ -69,9 +69,46 @@
 
 ---
 
+---
+
+## Phase 5: Enhance & Deploy (2026-06-29)
+
+| Task | Status | Notes |
+|------|--------|-------|
+| GROQ API endpoint fix | ✅ Complete | Changed from `api.openai.com` to `api.groq.com/openai/v1/...` |
+| Default model update | ✅ Complete | `openai/gpt-oss-120b` → `mixtral-8x7b-32768` → `qwen/qwen3.6-27b` |
+| Vite proxy config | ✅ Complete | `/api` → `localhost:5178` |
+| react-markdown integration | ✅ Complete | Markdown rendering with `remark-gfm` in modal |
+| Collapsible settings panel | ✅ Complete | Toggle via Settings button in Actions panel |
+| Dark mode default | ✅ Complete | Default theme set to dark |
+| Right-side Actions column | ✅ Complete | Generate Test Plan, Test Cases, RCA buttons |
+| Modal overlay for output | ✅ Complete | All generated content shown in modal with Edit/Preview toggle |
+| `<think>` tag stripping | ✅ Complete | Regex cleanup in both frontend and backend |
+| CSV-to-table rendering | ✅ Complete | Test Cases shown as proper HTML table in modal |
+| Download format buttons | ✅ Complete | .md, PDF, DOC buttons for markdown files |
+| Test Plan dedicated prompt | ✅ Complete | 17-section industry-standard template (Levels, Types, Entry/Exit, Suspension, Resources, Risks, References) |
+| Root Cause Analysis prompt | ✅ Complete | 10-section RCA prompt (5 Whys, Timeline, Impact, Corrective/Preventive actions) |
+| Field validation on save | ✅ Complete | Inline red errors below empty fields + green toast on success |
+| Rename to Jira - STLC Agent | ✅ Complete | Header, browser tab, health endpoint, console log all updated |
+| Favicon added | ✅ Complete | Custom SVG favicon (blue checkmark badge) |
+| Vercel deployment | ✅ Complete | Live at https://stlcagent-nine.vercel.app |
+
+### Key Changes in Phase 5:
+- **Architecture**: Replaced hardcoded document sections with GROQ-generated prompts for Test Plan and RCA
+- **UI**: Edit/Preview toggle on modal, CSV as HTML table, PDF/DOC download options, field validation toasts
+- **Backend**: 3 new endpoints (`/api/generate/test-plan`, `/api/generate/test-cases`, `/api/generate/rca`); shared `callGroq()` and `fetchJiraIssue()` helpers
+- **Prompts**: Distinct engineering prompts for Strategy, Test Plan (17 sections), Test Cases (CSV), RCA (10 sections)
+- **Deployment**: Adapted Express app for Vercel serverless (`api/index.js`, `vercel.json`)
+
+---
+
 ## Errors & Issues
 
-None. System functioning as designed through Phase 3.
+| Date | Issue | Resolution |
+|------|-------|------------|
+| 2026-06-29 | Test Plan endpoints returning HTML/404 | Required restarting Express server after adding new routes |
+| 2026-06-29 | `<think>` tags stripping too aggressively | Refined regex to strip only up to section headers, not to end of string |
+| 2026-06-29 | Test Plan output showing same content as Strategy | Created dedicated `buildTestPlanPrompt` with distinct 17-section template |
 
 ---
 
@@ -83,6 +120,8 @@ Awaiting Phase 4 & 5 completion for end-to-end testing.
 
 ## Approvals Needed
 
-- [ ] Node/Express API endpoints reviewed and approved
-- [ ] React UI design approved (dark/light mode themes)
-- [ ] Ready to proceed to Phase 5: Trigger (Deployment)?
+- [x] Node/Express API endpoints reviewed and approved
+- [x] React UI design approved (dark/light mode themes)
+- [x] Vercel deployment verified (https://stlcagent-nine.vercel.app)
+- [ ] User acceptance testing on live URL
+- [ ] Add custom domain (STLCAgent.vercel.app) if available

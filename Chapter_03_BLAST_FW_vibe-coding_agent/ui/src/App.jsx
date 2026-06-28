@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const STORAGE_KEY = 'blast-test-plan-settings';
+const APP_VERSION = '1.0.0';
 const API_URL = '/api';
 
 function App() {
@@ -10,15 +13,15 @@ function App() {
     jiraEmail: '',
     jiraToken: '',
     groqKey: '',
-    groqModel: 'openai/gpt-oss-120b',
+    groqModel: 'mixtral-8x7b-32768',
   });
   const [issueKey, setIssueKey] = useState('SCRUM-8');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('Ready');
+  const [showSettings, setShowSettings] = useState(false);
 
-  // Load settings from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -30,7 +33,6 @@ function App() {
     }
   }, []);
 
-  // Apply theme
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
@@ -41,7 +43,7 @@ function App() {
 
   const saveSettings = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    setStatus('✓ Settings saved locally');
+    setStatus('Settings saved locally');
   };
 
   const isConfigured = settings.jiraUrl && settings.jiraEmail && settings.jiraToken && settings.groqKey;
@@ -84,10 +86,10 @@ function App() {
       }
 
       setResult(data);
-      setStatus('✓ Test plan generated successfully');
+      setStatus('Test plan generated successfully');
     } catch (err) {
       setError(err.message);
-      setStatus('❌ Generation failed');
+      setStatus('Generation failed');
     } finally {
       setLoading(false);
     }
@@ -110,19 +112,29 @@ function App() {
       <header className="app-header">
         <div>
           <h1>BLAST Test Plan Generator</h1>
-          <p>Enterprise-grade test strategy from Jira issues</p>
+          <p className="header-subtitle">
+            BLAST Framework v{APP_VERSION} &mdash; Model: {settings.groqModel || 'mixtral-8x7b-32768'}
+          </p>
         </div>
-        <button
-          className="theme-toggle"
-          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
+        <div className="header-actions">
+          <button
+            className={`theme-toggle ${showSettings ? 'active' : ''}`}
+            onClick={() => setShowSettings(prev => !prev)}
+          >
+            {showSettings ? 'Close Settings' : 'Settings'}
+          </button>
+          <button
+            className="theme-toggle"
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          >
+            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+          </button>
+        </div>
       </header>
 
       <main className="app-main">
-        {/* Settings Panel */}
-        <section className="panel settings-panel">
+        {showSettings && (
+          <section className="panel settings-panel">
           <h2>Configuration</h2>
           <p>Configure your Jira and GROQ API credentials (stored locally in browser).</p>
 
@@ -173,19 +185,20 @@ function App() {
               GROQ Model
               <input
                 type="text"
-                placeholder="openai/gpt-oss-120b"
+                placeholder="mixtral-8x7b-32768"
                 value={settings.groqModel}
                 onChange={e => handleSettingsChange('groqModel', e.target.value)}
               />
             </label>
           </div>
 
+          <div className="spacer"></div>
           <button className="btn-primary" onClick={saveSettings}>
             Save Settings
           </button>
         </section>
+        )}
 
-        {/* Generation Panel */}
         <section className="panel generation-panel">
           <h2>Generate Test Plan</h2>
 
@@ -201,6 +214,7 @@ function App() {
             </label>
           </div>
 
+          <div className="spacer"></div>
           <div className="button-group">
             <button
               className="btn-primary"
@@ -217,6 +231,7 @@ function App() {
             </button>
           </div>
 
+          <div className="spacer"></div>
           <div className="status-box">
             <strong>Status:</strong> {status}
           </div>
@@ -224,31 +239,25 @@ function App() {
           {error && <div className="error-box">{error}</div>}
         </section>
 
-        {/* Result Panel */}
         {result && (
-          <>
-            <section className="panel result-panel">
-              <h2>Generated Strategy</h2>
-              <div className="code-block">
-                <pre>{result.strategy}</pre>
-              </div>
-            </section>
-
-            <section className="panel result-panel">
-              <h2>Complete Test Plan</h2>
-              <div className="code-block">
-                <pre>{result.testPlan}</pre>
-              </div>
-              <button className="btn-primary" onClick={downloadMarkdown}>
-                ⬇️ Download Markdown
+          <section className="panel result-panel full-width">
+            <div className="result-header">
+              <h2>Generated Test Plan Document</h2>
+              <button className="btn-primary download-btn" onClick={downloadMarkdown}>
+                Download Markdown
               </button>
-            </section>
-          </>
+            </div>
+            <div className="markdown-body">
+              <Markdown remarkPlugins={[remarkGfm]}>
+                {result.testPlan}
+              </Markdown>
+            </div>
+          </section>
         )}
       </main>
 
       <footer className="app-footer">
-        <p>BLAST Framework • Jira → Strategy → Plan Generator</p>
+        <p>BLAST Framework v{APP_VERSION} &mdash; Jira &rarr; Strategy &rarr; Plan Generator</p>
       </footer>
     </div>
   );

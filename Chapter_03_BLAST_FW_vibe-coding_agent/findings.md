@@ -1,6 +1,6 @@
 # Findings: Jira Test Plan Generator
 
-**Last Updated:** 2026-06-25
+**Last Updated:** 2026-06-29
 
 ---
 
@@ -94,9 +94,67 @@ vite==4.x                 # Frontend bundler
 4. **Logging** → All requests/errors logged to `.tmp/` directory
 5. **3-Layer Architecture** → Deterministic business logic separated from probabilistic LLM
 
+---
+
+## Phase 5 Findings (2026-06-29)
+
+### API & Integration
+- **GROQ Endpoint**: `https://api.groq.com/openai/v1/chat/completions` (not `api.openai.com`)
+- **GROQ Key Format**: Starts with `gsk_`
+- **Default Model**: `qwen/qwen3.6-27b` (supports markdown output with thinking tags)
+- **Token Limit**: Increased from 2000 to 6000 to accommodate full Test Plan and RCA documents
+- **Temperature**: 0.0 for deterministic output across all endpoints
+
+### Prompt Engineering
+- **Test Strategy**: Strategy narrative prompt → frontend `buildMarkdown()` wraps in 11-section document
+- **Test Plan**: 17-section comprehensive prompt with tables for Features, Levels/Types, Resources, Risks, References
+- **Test Cases**: CSV-only prompt, BOM prefix for Excel compatibility
+- **Root Cause Analysis**: 10-section RCA prompt with 5-Whys, Timeline, Impact Analysis, Corrective/Preventive actions
+
+### UI/UX Changes
+- Modal overlay with Edit/Preview toggle for all output files
+- CSV rendered as HTML table (sticky header, alternating rows, hover)
+- Three download formats: `.md`, PDF (print dialog), DOC (Word-compatible HTML)
+- Field-level validation with red inline errors on Save Settings
+- Green toast notification on successful save (3-second auto-dismiss)
+- PDF/DOC buttons hidden for CSV files
+
+### Vercel Deployment
+- **Platform**: Vercel (serverless)
+- **Adapter**: Express app exported as default from `api/index.js`
+- **Config**: `vercel.json` with Vite framework, dist output, SPA rewrite
+- **Live URL**: https://stlcagent-nine.vercel.app
+- **Custom Domain**: `STLCAgent.vercel.app` requested but not available (project name: `stlcagent`)
+
+### Dependency Additions
+
+```
+react-markdown@10.x       # Markdown rendering in React
+remark-gfm@4.x            # GFM tables/strikethrough for markdown
+vercel@54.x               # Vercel CLI for deployment
+```
+
+### Key Design Decisions (Phase 5)
+1. **Dedicated Prompts**: Each endpoint (strategy, plan, test-cases, rca) has its own GROQ prompt for distinct outputs
+2. **CSV Parsing**: Client-side quote-aware CSV parser renders test cases as HTML table
+3. **Markdown-to-HTML**: Simple regex-based converter for PDF/DOC output (no heavy dependencies)
+4. **Serverless Adaptation**: Express app conditionally listens (`!process.env.VERCEL`) and exports `default app`
+5. **Field Errors**: Inline validation replaces browser `alert()` for better UX
+6. **Toast Notifications**: CSS-animated toast for non-intrusive success feedback
+
+### Open Issues
+- [ ] GROQ model occasionally outputs `<think>` without closing `</think>` — mitigated by regex fallback
+- [ ] Test Plan output token-heavy (max 6000) — may truncate for very complex features
+- [ ] PDF quality depends on browser print engine — no server-side PDF generation
+- [ ] Custom domain not configured — uses Vercel auto-generated `stlcagent-nine.vercel.app`
+
 ## Next Steps
 
-1. Create Node/Express API backend to expose tools
-2. Build React UI (Phase 4: Stylize)
-3. Test end-to-end pipeline
-4. Deploy (Phase 5: Trigger)
+1. ~~Create Node/Express API backend to expose tools~~ ✅ Complete
+2. ~~Build React UI (Phase 4: Stylize)~~ ✅ Complete
+3. ~~Test end-to-end pipeline~~ ✅ Complete
+4. ~~Deploy (Phase 5: Trigger)~~ ✅ Complete — https://stlcagent-nine.vercel.app
+5. [ ] Configure custom domain if available
+6. [ ] Add server-side PDF generation for consistent PDF output
+7. [ ] Support multiple Jira issues in batch
+8. [ ] Add user authentication / API key management

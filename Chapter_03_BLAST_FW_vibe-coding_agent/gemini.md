@@ -17,8 +17,8 @@ Fetch a Jira issue by ID (e.g. SCRUM-8) and generate a   Test Plan from it.
 {
     "jira_url": "https://navsharmatest.atlassian.net/",
     "jira_email": "navneetsharmatest@gmail.com",
-    "jira_token": "ATATT3xFfGF0Wm1mAmuLNXM_iH7SSjugHN0rvzD6TLojBAqH6hNxh3Ca-jyFmD9q9aa-8VyHWmyfowAu2Ce0TIUvc0WJ8p2S..............",
-    "groq_key": "gsk_tX..................",
+    "jira_token": "...............................",
+    "groq_key": "...............",
     "jira_id": "SCRUM-8"
 }
 ```
